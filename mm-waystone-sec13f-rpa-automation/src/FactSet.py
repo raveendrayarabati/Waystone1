@@ -14,6 +14,7 @@ from fds.sdk.Formula.apis import TimeSeriesApi
 
 class FormulaDataProcessor:
     def __init__(self, config_file='mm-waystone-sec13f-rpa-automation/src/config/appconfig.json'):
+        print("something")
         # Check if the config file exists
         if not os.path.exists(config_file):
             raise FileNotFoundError(f"Configuration file not found: {config_file}")
