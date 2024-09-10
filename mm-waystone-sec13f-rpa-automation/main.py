@@ -550,9 +550,9 @@ with tab0:
 with tab1:
     st.header(""":blue[SEC 13F Data]""")
     n_preview = 15
-    sec_15_csv_path = "mm-waystone-sec13f-rpa-automation/resources/13flist2024q2.csv"
+    sec_15_csv_path = "resources/13flist2024q2.csv"
 
-    sec_15_pdf_path = "mm-waystone-sec13f-rpa-automation/resources/13flist2024q2.pdf"
+    sec_15_pdf_path = "resources/13flist2024q2.pdf"
     # Upload area for 13F Table
     # st.divider()
 
