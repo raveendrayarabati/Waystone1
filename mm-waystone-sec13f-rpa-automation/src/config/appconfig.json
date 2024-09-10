@@ -1,0 +1,26 @@
+{
+  "name": "13F Generator",
+  "clientId": "fb296a8e3bab4bfc858cca330291a471",
+  "clientAuthType": "Confidential Client Application - User Authorization",
+  "owners": [
+    "WAYSTON-1844786"
+  ],
+  "jwk": {
+    "kty": "RSA",
+    "use": "sig",
+    "alg": "RS256",
+    "kid": "4d12b92f37a546c39408343d503cf86c",
+    "d": "A4MJqw8xIjwE1VmQO161cq3Xgmi0LgfOR1qBV7VKbAdBDQZ223T5V6kB2IdBHg9YfuH2t9yIaXwZAyQ1pYgGTIPoqUGPInxFrFrAhISv5rlZ9a7HMqJwznEEHhV8DpVV9RKedcOhUsh4_UMpcRDdtsbHrj6S0BM8Yp6nxhCTcX8O1h7zo7I8cPzyTHv3E9sW1AcOyncQ7vDBeOQAiR7Ygr3JKLonRmpoX7BR37iPr2XhQGl29k_ZY-QQ-3xz2rEmeigs-VfGiBWaagCfIeWwqIbm_JE8fBPNsyTHF_tuF9Gf4NgGhBmQZQQ5mEDtXkYHvHnBBMcnUMcDcR6BivE_4Q",
+    "n": "gJRVibSDx4e7jDaSlShynKURe-IM-f3BhkMIChoMM7nKRAGzC7QHhw7Nl3gVWr0lygFfgpw2ooo5q4JCCWRfnMas7kwkC-23b-ZhuBeDxvjyaxUBodfgFySxNkoaUyYeqfyAMqQNgK-Xj1MM53Hz73sPTmjW52h309BJ5k6WwAF9vhT0_cKDpl9DbRJDy6K3bElOrdeuCiixzjFxdDwikz7uwCc_kDQM-56rY_gn__HHzdv9dOOF8-PW-wGBz24Pco5ticR4HOzsQByDgYt5uGouHBTfxfBH4Tm6mW3mhzR847-gnSmNXG_DZEISovlHDIKu6byzTxCgkZ8vkdcyPw",
+    "e": "AQAB",
+    "p": "29CLGmI0qwPedkBn9D6ng-mLFcXlIFKaRreeQQfZUmqwOvwaQSjXC8a6rK7KfxjIIseB9J7lKCag4Ukn7TQ3XcCeFd2oRr8n1QzpfEeCLayvYXcweVEIi0k5L3b8q1B-UjYRCzRy7Az-aIYxDh3e8WxlZ9Hjt_ibxppaqke77Rc",
+    "q": "lb7yASEmSEx-nX0AwWrrXx03q2M_lScnYyE7vrUggY7qP0bdzEQ5_ueP9rFlzqpMu92h6x7Q7f_3m6h926o60UIBoPc60P43JY7eMzOgPkkA8nn0jb3NdBeBOYGd137VGgWCDc-sjFjLFQG--ui6gwhNsJA-OWq3wH1swbiwLRk",
+    "dp": "Iq5QhCUicij2HGok_KA2BdX_H7xNXkAqHyYxTclTPHGgxG2qJsWuyCjeowgg4tSiHvqjQlkfhqoxj9ne9snaQmx1hLWoKyFVw4N6AyW1IEeylAoeF8X1NySiZR681rqoc4gcQExSJXQXX55sdvG3jxevGCZBa3FKApev3lXbDJk",
+    "dq": "WMaD6GGDtZcL9Uf3W7OMaK4Eo-nJ9x3oPt-j8NKmu8hDXVIhCglkrJcRhTn0VkomBbZGWQLC8GYwoCqKuuC3z_kmyAvp5Z7giLajSo2PsX1MP3RHpIRiujF5HeOW9PuvUKb1TETTUb0OYJzRYST59dbFYCiTiyyWVVrGUC6y23k",
+    "qi": "n4WJPXRfuISzFAHku9TroeP9JIE5Ybw-CLMA0PCo3PT5dL8TH6WbkGbzkCd2FIQokqisHBOCfntjoneaH6-1SAx3iYPT-w_RzT_FGdSGWCDWPA1C1-eg7iiUDg6KC9w2o40WOuoMBkSZjqQ9cOfIwAsL-_MgyywOPUazef2F_rg"
+  },
+  "redirectUris": [
+    "https://waystonesec13f-a4y3f7svlgsybignwpramr.streamlit.app/"
+  ],
+  "wellKnownUri": "https://auth.factset.com/.well-known/openid-configuration"
+}
