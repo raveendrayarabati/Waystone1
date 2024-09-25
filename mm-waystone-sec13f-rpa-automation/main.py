@@ -8,7 +8,6 @@ import streamlit as st
 from datetime import datetime
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 
-
 from src.functions import (
     get_input,
     handle_ticker,
@@ -143,7 +142,7 @@ def handle_cusips(client_df, cusip_column, quantity_column, price_as_on_date):
         ws_df = ws_df.rename(
             {cusip_column: "CUSIP (Client)", "EODPrice": "Price"}, axis=1
         )
-
+        # ws_df["Price"] = ws_df["Price"].round(2)
         ws_df["SEC Match?"] = ws_df.apply(
             lambda x: True
             if pd.notnull(x["CUSIP (SEC)"])
@@ -177,7 +176,7 @@ def handle_cusips(client_df, cusip_column, quantity_column, price_as_on_date):
         # changed ceil to round
         ws_df["Market Value (Quantity*Price)"] = ws_df[
             "Market Value (Quantity*Price)"
-        ].apply(np.round)
+        ].round(2)
         # PUT/CALL IMPLEMENTATION
         if desc_column is not None:
             ws_df["PUT/CALL"] = desc_col_values
@@ -207,6 +206,16 @@ def handle_cusips(client_df, cusip_column, quantity_column, price_as_on_date):
         else:
             print("Not Available")
         print("Data............", ws_df)
+        if market_value_column is not None:
+            ws_df["Market Value(client)"] = market_value_agg
+            ws_df["Market_value_match?"] = ws_df.apply(
+                lambda x: "Yes"
+                if  -1 < x["Market Value(client)"] - x["Market Value (Quantity*Price)"] < 1
+                else "N0",axis=1)
+        else:
+            ws_df["Market Value(client)"] = ws_df["Market_value_match?"] = "-"
+
+
         ws_df = ws_df.rename({quantity_column: "Quantity"}, axis=1)
         # Excluding CUsip's WhicH are not in SEC 13f
         print("Beforeeeeeeeeeee\n:", ws_df)
@@ -719,10 +728,13 @@ with tab2:
             # client_df[cusip_column] = client_df[cusip_column].str.apply(lambda x: x.zfill(9))
 
             ids = list(client_df[cusip_column])
-            price_as_on_date = datetime(2024, 6, 30)
+            # price_as_on_date = datetime(2024,6,30)
+            price_as_on_date = last_date_of_previous_quarter()
+            # Convert the string to a datetime object
+            price_as_on_date = datetime.strptime(price_as_on_date, "%Y-%m-%d")
             as_on_date = price_as_on_date.strftime("%m/%d/%Y")
             display_names = ["EODPrice"]
-            timeSeries_formulas = ["P_PRICE(NOW)"]
+            timeSeries_formulas = [f"P_PRICE({as_on_date})"]
             cross_formulas = [f"FG_PRICE({as_on_date})"]
             # cross_series_df = processor.fetch_data(ids, cross_formulas, display_names)
             # time_Series_df = processor.fetch_time_series_data(
@@ -763,8 +775,11 @@ with tab2:
             # Example usage
             cross_series_df = fetch_with_retry(processor.fetch_data, ids, cross_formulas, display_names)
             print("cross:\n", cross_series_df)
-            
+
             time_series_df = fetch_with_retry(processor.fetch_time_series_data, ids, timeSeries_formulas, display_names)
+
+            time_series_df['date'] = pd.to_datetime(time_series_df['date'] )
+            time_series_df = time_series_df[time_series_df["date"] == price_as_on_date]
             print("time:\n", time_series_df)
             
             # Ensure data is valid before merging
@@ -808,6 +823,8 @@ with tab2:
         if cusip_column is not None:
             client_df = client_df.rename({cusip_column: cusip_column.lower()}, axis=1)
             cusip_column = cusip_column.lower()
+        if market_value_column is not None:
+            Market_value_agg = ""
         if desc_column is not None:
             # desc_col_values = client_df[desc_column]
 
@@ -854,20 +871,38 @@ with tab2:
             client_df["PUT/CALL"].fillna(" ", inplace=True)
             print("client-----------------df", client_df)
             # Group by 'cusip_column' and 'PUT/CALL', sum 'quantity_column', and reset index
-            client_df = (
-                client_df.groupby([cusip_column, "PUT/CALL"])[quantity_column]
-                .sum()
-                .reset_index()
-            )
+            if market_value_column is not None :
+                client_df = (
+                    client_df.groupby([cusip_column, "PUT/CALL"])[[quantity_column,market_value_column]]
+                    .sum()
+                    .reset_index()
+                )
+                market_value_agg = client_df[market_value_column]
+                print("client_df_mv " , client_df)
+                client_df.drop([market_value_column], axis=1, inplace=True)
+            else:
+                client_df = (
+                    client_df.groupby([cusip_column, "PUT/CALL"])[quantity_column]
+                    .sum()
+                    .reset_index()
+                )
             # Optionally, you can replace 'NoneValue' back to None after the groupby operation if needed.
             client_df["PUT/CALL"].replace("No Value", np.nan, inplace=True)
             print("client-----------------df", client_df)
             desc_col_values = client_df["PUT/CALL"]
             client_df.drop(["PUT/CALL"], axis=1, inplace=True)
         elif cusip_column and quantity_column is not None:
-            client_df = (
-                client_df.groupby([cusip_column])[quantity_column].sum().reset_index()
-            )
+            if market_value_column is not None:
+                client_df = (
+                    client_df.groupby([cusip_column])[[quantity_column,market_value_column]].sum().reset_index()
+                )
+                market_value_agg = client_df[market_value_column]
+                client_df.drop([market_value_column], axis=1, inplace=True)
+            else:
+                client_df = (
+                    client_df.groupby([cusip_column])[quantity_column].sum().reset_index()
+                )
+
         st.write(
             f"Preview of UNIQUE CUSIPs and Quantity(shares) ({n_preview} rows only):"
         )
@@ -1031,6 +1066,7 @@ with tab4:
         result_df_matched = pd.concat([cusips_all_no_not_put_call, filtered_df1], ignore_index=True)
         uploaded_ws_df = pd.concat([result_df_matched, cusips_with_put_call_No], ignore_index=True)
         uploaded_ws_df = uploaded_ws_df.sort_values(by='Issuer Name (SEC)')
+        uploaded_ws_df = uploaded_ws_df.drop(['Market Value(client)','Market_value_match?'], axis=1, errors='ignore')
         is_correct, msg = validate_ws_cols(uploaded_ws_df)
         if is_correct:
             sec_13f_excel_revised = generate_13f_from_ws(uploaded_ws_df,client_data_file_name)

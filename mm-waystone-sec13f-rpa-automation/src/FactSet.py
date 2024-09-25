@@ -14,7 +14,6 @@ from fds.sdk.Formula.apis import TimeSeriesApi
 
 class FormulaDataProcessor:
     def __init__(self, config_file='src/config/appconfig.json'):
-        print("something")
         # Check if the config file exists
         if not os.path.exists(config_file):
             raise FileNotFoundError(f"Configuration file not found: {config_file}")
@@ -136,12 +135,17 @@ if __name__ == "__main__":
         print("There may be an issue with the Formula API Service:", health_info)
 
     # Make Batch requests
-    ids = ["252131107", "38141G104", "457669AB5", "501889208", "61174X109", "759916AC3", "V7780T103", "AAPL"]
-    formulas = ["FF_CUSIP(CURR)", "P_PRICE(NOW)", "FSYM_TICKER_EXCHANGE", "P_EXCOUNTRY"]
-    display_names = ["CUSIP", "EODPrice", "Ticker", "Country"]
 
-    results_df = processor.fetch_data(ids, formulas, display_names)
+    ids = [ "AAPL","AVGO","WRB","CTAS","MSTR","SNFCA","SCCO","TTEK","USLM","WSM","DECK"]
+
+    formulas = ["FF_CUSIP(CURR)", "FSYM_TICKER_EXCHANGE", "P_EXCOUNTRY","P_PRICE(06/28/2024,,,,'unsplit')","p_price(06/28/2024)","p_split()"]
+    display_names = ["CUSIP", "Ticker", "Country", "EODPrice","price","split_ratio"]
+
+
+    results_df = processor.fetch_time_series_data(ids, formulas, display_names)
     if results_df is not None:
+        # print("eod:",results_df["EODPrice"])
+        # results_df.to_excel(r"C:\Users\mm3816\Desktop\ravi_files\outputsdfghi.xlsx", index = False)
         # Do something with the results_df
         pass
 
