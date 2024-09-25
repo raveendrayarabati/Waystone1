@@ -152,18 +152,37 @@ def run_mappings(client_df: pd.DataFrame,
     ids = [str(x).strip() for x in client_df[cusip_col].tolist()]
     # ids = ["252131107", "38141G104", "457669AB5", "501889208", "61174X109", "759916AC3", "V7780T103", "AAPL"]
     cross_formulas = ["FF_CUSIP(CURR)", f"FG_PRICE({price_as_on_date})", "FSYM_TICKER_EXCHANGE", "P_EXCOUNTRY"]
-    timeSeries_formulas = ["FF_CUSIP(CURR)", "P_PRICE(NOW)", "FSYM_TICKER_EXCHANGE", "P_EXCOUNTRY"]
+    timeSeries_formulas = ["FF_CUSIP(CURR)", f"P_PRICE({price_as_on_date},,,,unsplit)", "FSYM_TICKER_EXCHANGE", "P_EXCOUNTRY"]
     display_names = ["CUSIP", "EODPrice", "Ticker", "Country"]
-
     start_time = time.time()  # Record start time
     cross_series_df = fs_processor.fetch_data(ids, cross_formulas, display_names)
+    print("cross_series_dfffff", cross_series_df)
     time.sleep(3)
     time_Series_df = fs_processor.fetch_time_series_data(ids, timeSeries_formulas, display_names)
+    print("price_as_on_date.....................",price_as_on_date,type(price_as_on_date))
+    # current_date = datetime.now().date()
+    date_string = price_as_on_date
+
+    # Convert the string to a datetime object
+    datetime_obj = datetime.strptime(date_string, "%m/%d/%Y")
+
+    # Extract the date part
+    date_obj = datetime_obj.date()
+    time_Series_df['date'] = pd.to_datetime(time_Series_df['date'])
+    time_Series_df = time_Series_df[time_Series_df["date"].dt.date == date_obj]
+
+    time_Series_df = time_Series_df.reset_index()
+    print("time_Series_df", time_Series_df)
     # cross_series_df=fetch_with_retry(fs_processor.fetch_data(ids, cross_formulas, display_names))
     # time_Series_df =fetch_with_retry(fs_processor.fetch_time_series_data(ids, timeSeries_formulas, display_names))
     merged_df = pd.merge(cross_series_df, time_Series_df, on='requestId', suffixes=('_df1', '_df2'))
-    cross_series_df['EODPrice'].fillna(merged_df['EODPrice_df2'], inplace=True)
-    cross_series_df['Ticker'].fillna(merged_df['Ticker_df2'], inplace=True)
+    # cross_series_df['EODPrice'].fillna(merged_df['EODPrice_df2'], inplace=True)
+    # cross_series_df['Ticker'].fillna(merged_df['Ticker_df2'], inplace=True)
+
+    print("mergeddddddd",merged_df)
+    time_Series_df['EODPrice'].fillna(merged_df['EODPrice_df1'], inplace=True)
+    time_Series_df['Ticker'].fillna(merged_df['Ticker_df1'], inplace=True)
+
 
     end_time = time.time()  # Record end time
 
@@ -171,7 +190,10 @@ def run_mappings(client_df: pd.DataFrame,
     minutes, seconds = divmod(runtime_seconds, 60)  # Convert to minutes and seconds
     runtime_formatted = f"{minutes}m {seconds}s"  # Format the runtime
 
-    result_df = cross_series_df
+    # result_df = cross_series_df
+    result_df = time_Series_df
+    result_df = result_df.drop(columns=["index","date"])
+    print("resultttttt", result_df)
 
     if result_df is not None:
         try:
@@ -370,7 +392,15 @@ def last_date_of_previous_quarter():
     # Calculate the last day of the previous quarter
     last_day_previous_quarter = first_day_current_quarter - timedelta(days=1)
 
-    return last_day_previous_quarter.strftime('%Y-%m-%d')
+    def get_last_working_day(date):
+        while date.weekday() in [5, 6]:  # 5: Saturday, 6: Sunday
+            date -= timedelta(days=1)
+        return date
+
+    # Get the last working day (this function only considers weekends)
+    last_working_day = get_last_working_day(last_day_previous_quarter)
+
+    return last_working_day.strftime('%Y-%m-%d')
 
 def Cleaning_Top_And_Bottom_rows(df,combined_df):
     unnamed_columns = df.columns[df.columns.str.startswith('Unnamed:') & ~df.columns.isna()]
